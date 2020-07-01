@@ -3,7 +3,7 @@ import User from '@modules/users/infra/typeorm/entities/User';
 import IHashProvider from '@modules/users/providers/HashProvider/models/IHashProvider';
 import AppError from '@shared/errors/AppError';
 import authConfig from '@config/auth';
-import redis from 'redis';
+import redis, { RedisClient } from 'redis';
 import JWTRedis from 'jwt-redis/build/JWTRedis';
 import IUsersRepository from '../repositories/IUsersRepository';
 
@@ -25,14 +25,14 @@ class LoginUserService {
 
     @inject('HashProvider')
     private hashProvider: IHashProvider,
+
+    private redisClient: RedisClient = redis.createClient(),
   ) {}
 
   public async execute({
     email,
     password,
   }: IRequestDTO): Promise<IResponseDTO> {
-    const redisClient = redis.createClient();
-    const jwtr = new JWTRedis(redisClient);
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {
@@ -49,10 +49,12 @@ class LoginUserService {
     }
 
     const { secret, expiresIn } = authConfig.jwt;
+    const jwtr = new JWTRedis(this.redisClient);
     const token = await jwtr.sign({}, secret, {
       subject: user.uuid,
       expiresIn,
     });
+    this.redisClient.end();
 
     return {
       user,

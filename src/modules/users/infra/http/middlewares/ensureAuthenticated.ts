@@ -16,9 +16,6 @@ export default async function ensureAuthenticated(
   response: Response,
   next: NextFunction,
 ): Promise<void> {
-  const redisClient = redis.createClient();
-  const jwtr = new JWTRedis(redisClient);
-
   const authHeader = request.headers.authorization;
 
   if (!authHeader) {
@@ -26,6 +23,8 @@ export default async function ensureAuthenticated(
   }
 
   const [, token] = authHeader.split(' ');
+  const redisClient = redis.createClient();
+  const jwtr = new JWTRedis(redisClient);
   try {
     const decoded = await jwtr.verify(token, authConfig.jwt.secret);
 
@@ -33,9 +32,10 @@ export default async function ensureAuthenticated(
     request.user = {
       uuid: sub,
     };
-
+    redisClient.end();
     return next();
   } catch {
+    redisClient.end();
     throw new AppError('Invalid JWT token', 401);
   }
 }

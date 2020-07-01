@@ -1,6 +1,7 @@
 import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
 import AppError from '@shared/errors/AppError';
+import redis from 'redis-mock';
 import LoginUserService from './LoginUserService';
 import CreateUserService from './CreateUserService';
 
@@ -13,7 +14,11 @@ describe('LoginUser', () => {
   beforeEach(() => {
     fakeUsersRepository = new FakeUsersRepository();
     fakeHashProvider = new FakeHashProvider();
-    loginUser = new LoginUserService(fakeUsersRepository, fakeHashProvider);
+    loginUser = new LoginUserService(
+      fakeUsersRepository,
+      fakeHashProvider,
+      redis.createClient(),
+    );
     createUser = new CreateUserService(fakeUsersRepository, fakeHashProvider);
   });
 
