@@ -1,10 +1,10 @@
 import { injectable, inject } from 'tsyringe';
-import { sign } from 'jsonwebtoken';
-
 import User from '@modules/users/infra/typeorm/entities/User';
 import IHashProvider from '@modules/users/providers/HashProvider/models/IHashProvider';
 import AppError from '@shared/errors/AppError';
 import authConfig from '@config/auth';
+import redis from 'redis';
+import JWTRedis from 'jwt-redis/build/JWTRedis';
 import IUsersRepository from '../repositories/IUsersRepository';
 
 interface IRequestDTO {
@@ -18,7 +18,7 @@ interface IResponseDTO {
 }
 
 @injectable()
-class AuthenticateUserService {
+class LoginUserService {
   constructor(
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
@@ -31,6 +31,8 @@ class AuthenticateUserService {
     email,
     password,
   }: IRequestDTO): Promise<IResponseDTO> {
+    const redisClient = redis.createClient();
+    const jwtr = new JWTRedis(redisClient);
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {
@@ -47,7 +49,7 @@ class AuthenticateUserService {
     }
 
     const { secret, expiresIn } = authConfig.jwt;
-    const token = sign({}, secret, {
+    const token = await jwtr.sign({}, secret, {
       subject: user.uuid,
       expiresIn,
     });
@@ -58,4 +60,4 @@ class AuthenticateUserService {
     };
   }
 }
-export default AuthenticateUserService;
+export default LoginUserService;

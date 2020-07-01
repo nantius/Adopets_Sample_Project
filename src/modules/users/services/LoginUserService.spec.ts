@@ -1,22 +1,19 @@
 import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
 import AppError from '@shared/errors/AppError';
-import AuthenticateUserService from './AuthenticateUserService';
+import LoginUserService from './LoginUserService';
 import CreateUserService from './CreateUserService';
 
 let fakeUsersRepository: FakeUsersRepository;
 let fakeHashProvider: FakeHashProvider;
-let authenticateUser: AuthenticateUserService;
+let loginUser: LoginUserService;
 let createUser: CreateUserService;
 
-describe('AuthenticateUser', () => {
+describe('LoginUser', () => {
   beforeEach(() => {
     fakeUsersRepository = new FakeUsersRepository();
     fakeHashProvider = new FakeHashProvider();
-    authenticateUser = new AuthenticateUserService(
-      fakeUsersRepository,
-      fakeHashProvider,
-    );
+    loginUser = new LoginUserService(fakeUsersRepository, fakeHashProvider);
     createUser = new CreateUserService(fakeUsersRepository, fakeHashProvider);
   });
 
@@ -27,7 +24,7 @@ describe('AuthenticateUser', () => {
       password: '123456',
     });
 
-    const response = await authenticateUser.execute({
+    const response = await loginUser.execute({
       email: 'test@test.com',
       password: '123456',
     });
@@ -38,7 +35,7 @@ describe('AuthenticateUser', () => {
 
   it('should not be able to authenticate a non existing user', async () => {
     await expect(
-      authenticateUser.execute({
+      loginUser.execute({
         email: 'test@test.com',
         password: '123456',
       }),
@@ -53,7 +50,7 @@ describe('AuthenticateUser', () => {
     });
 
     await expect(
-      authenticateUser.execute({
+      loginUser.execute({
         email: 'test@test.com',
         password: 'wrongpassword',
       }),
