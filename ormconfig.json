@@ -6,7 +6,8 @@
   "username": "adopets",
   "database": "adopets",
   "entities": [
-    "./src/modules/**/infra/typeorm/entities/*.ts"
+    "./src/modules/**/infra/typeorm/entities/*.ts",
+    "./src/shared**/infra/typeorm/entities/*.ts"
   ],
   "migrations": [
     "./src/shared/infra/typeorm/migrations/*.ts"

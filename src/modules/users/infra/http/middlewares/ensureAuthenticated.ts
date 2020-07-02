@@ -32,10 +32,10 @@ export default async function ensureAuthenticated(
     request.user = {
       uuid: sub,
     };
-    redisClient.end();
+    redisClient.end(true);
     return next();
   } catch {
-    redisClient.end();
+    redisClient.end(true);
     throw new AppError('Invalid JWT token', 401);
   }
 }
