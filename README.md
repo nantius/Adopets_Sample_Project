@@ -2,6 +2,9 @@
 
 ## Setup
 * yarn 
+* docker run --name adopets --network adopets -p 5432:5432 -e POSTGRES_USER=adopets -e POSTGRES_PASSWORD=adopets -e POSTGRES_DB=adopets -d postgres
+* docker run --name redis_adopets --network adopets -p 6379:6379 -d -t redis:alpine
+* yarn dev:server
 
 ## Testing
 * yarn test
